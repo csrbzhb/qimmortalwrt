@@ -1,3 +1,4 @@
+#!/bin/bash
 export WRT_THEME=aurora
 export WRT_NAME=Jwrt
 export WRT_SSID=Jwrt
@@ -11,8 +12,8 @@ export WRT_MARK="GITHUB_REPOSITORY"
 export WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d-%H.%M.%S")
 echo $WRT_DATE $WRT_MARK
 cd package/
-sh ../Packages.sh
-sh ../Handles.sh
+bash ../Packages.sh
+bash ../Handles.sh
 cd ..
-sh Settings.sh
+bash Settings.sh
 sed -i 's/+python3-pkg-resources //g; s/+python3-email /+python3 /g' package/netspeedtest/luci-app-netspeedtest/Makefile
