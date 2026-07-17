@@ -30,4 +30,35 @@ CFG_FILE="./package/base-files/files/bin/config_generate"
 sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
 #修改默认主机名
 sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
-echo "$WRT_SSID $WRT_THEME $WRT_IP"
+
+#配置文件修改
+echo "CONFIG_PACKAGE_luci=y" >> ./.config
+echo "CONFIG_LUCI_LANG_zh_Hans=y" >> ./.config
+echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
+echo "CONFIG_PACKAGE_luci-app-$WRT_THEME-config=y" >> ./.config
+
+#引入私有扩展配置
+if [ -f "$GITHUB_WORKSPACE/Config/PRIVATE.txt" ]; then
+	echo "Applying private configurations from PRIVATE.txt..."
+	cat $GITHUB_WORKSPACE/Config/PRIVATE.txt >> ./.config
+fi
+
+#手动调整的插件
+if [ -n "$WRT_PACKAGE" ]; then
+	echo -e "$WRT_PACKAGE" >> ./.config
+fi
+
+#无WIFI配置标志
+if [[ "${WRT_CONFIG,,}" == *"wifi"* && "${WRT_CONFIG,,}" == *"no"* ]]; then
+	echo "WRT_WIFI=wifi-no" >> $GITHUB_ENV
+fi
+
+#高通平台调整
+DTS_PATH="./target/linux/qualcommax/dts/"
+if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
+	#无WIFI配置调整Q6大小
+	if [[ "${WRT_CONFIG,,}" == *"wifi"* && "${WRT_CONFIG,,}" == *"no"* ]]; then
+		find $DTS_PATH -type f ! -iname '*nowifi*' -exec sed -i 's/ipq\(6018\|8074\).dtsi/ipq\1-nowifi.dtsi/g' {} +
+		echo "qualcommax set up nowifi successfully!"
+	fi
+fi
