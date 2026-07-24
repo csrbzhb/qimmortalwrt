@@ -11,6 +11,11 @@ export WRT_IP=192.168.10.1
 export WRT_MARK="GITHUB_REPOSITORY"
 export WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d-%H.%M.%S")
 echo $WRT_DATE $WRT_MARK
+# add siyuan
+grep -q "siyuan" feeds.conf.default || echo "src-git siyuan https://github.com/csrbzhb/luci-app-siyuan.git" >> ./feeds.conf.default
+
+./scripts/feeds update -a
+./scripts/feeds install -a
 cd package/
 bash ../Packages.sh
 bash ../Handles.sh
